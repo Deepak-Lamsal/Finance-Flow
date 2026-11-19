@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from database import get_connection, init_db
 from schemas import TransactionCreate, TransactionOut
@@ -52,3 +52,54 @@ def list_transactions():
     conn.close()
 
     return [dict(row) for row in rows]
+@app.put("/api/transactions/{transaction_id}", response_model=TransactionOut)
+def update_transaction(transaction_id: int, transaction: TransactionCreate):
+    conn = get_connection()
+
+    # First check the record exists
+    existing = conn.execute(
+        "SELECT id FROM transactions WHERE id = ?", (transaction_id,)
+    ).fetchone()
+
+    if existing is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    conn.execute(
+        """
+        UPDATE transactions
+        SET type = ?, title = ?, amount = ?, category = ?, date = ?
+        WHERE id = ?
+        """,
+        (
+            transaction.type,
+            transaction.title,
+            transaction.amount,
+            transaction.category,
+            transaction.date.isoformat(),
+            transaction_id,
+        ),
+    )
+    conn.commit()
+
+    row = conn.execute(
+        "SELECT * FROM transactions WHERE id = ?", (transaction_id,)
+    ).fetchone()
+    conn.close()
+
+    return dict(row)
+
+
+@app.delete("/api/transactions/{transaction_id}", status_code=204)
+def delete_transaction(transaction_id: int):
+    conn = get_connection()
+
+    cursor = conn.execute(
+        "DELETE FROM transactions WHERE id = ?", (transaction_id,)
+    )
+    conn.commit()
+    conn.close()
+
+    # rowcount = how many rows were deleted. 0 means that id didn't exist
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Transaction not found")
