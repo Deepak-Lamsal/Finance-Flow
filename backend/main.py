@@ -1,6 +1,7 @@
+from datetime import date
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 
 from database import get_connection, init_db
@@ -106,6 +107,113 @@ def delete_transaction(transaction_id: int):
     # rowcount = how many rows were deleted. 0 means that id didn't exist
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Transaction not found")
+
+
+def totals_by_type(rows):
+    """Turn SQL rows into {'income': 0, 'expense': 0} totals."""
+    totals = {"income": 0.0, "expense": 0.0}
+    for row in rows:
+        totals[row["type"]] = row["total"]
+    return totals
+
+
+@app.get("/api/summary")
+def get_summary(
+    month: int | None = Query(None, ge=1, le=12),
+    year: int | None = Query(None, ge=2000, le=2100),
+):
+    # If no month/year is given, use the current one
+    today = date.today()
+    month = month or today.month
+    year = year or today.year
+    prefix = f"{year:04d}-{month:02d}"  # e.g. "2026-11"
+
+    conn = get_connection()
+
+    month_rows = conn.execute(
+        """
+        SELECT type, SUM(amount) AS total
+        FROM transactions
+        WHERE substr(date, 1, 7) = ?
+        GROUP BY type
+        """,
+        (prefix,),
+    ).fetchall()
+
+    all_rows = conn.execute(
+        "SELECT type, SUM(amount) AS total FROM transactions GROUP BY type"
+    ).fetchall()
+    conn.close()
+
+    month_totals = totals_by_type(month_rows)
+    all_totals = totals_by_type(all_rows)
+
+    return {
+        "month": month,
+        "year": year,
+        "total_income": round(month_totals["income"], 2),
+        "total_expenses": round(month_totals["expense"], 2),
+        "monthly_savings": round(month_totals["income"] - month_totals["expense"], 2),
+        "remaining_balance": round(all_totals["income"] - all_totals["expense"], 2),
+    }
+@app.get("/api/chart-data")
+def get_chart_data(
+    month: int | None = Query(None, ge=1, le=12),
+    year: int | None = Query(None, ge=2000, le=2100),
+):
+    today = date.today()
+    month = month or today.month
+    year = year or today.year
+
+    conn = get_connection()
+
+    # --- Last 6 months, ending at the selected month ---
+    months = []
+    y, m = year, month
+    for _ in range(6):
+        months.append(f"{y:04d}-{m:02d}")
+        m -= 1
+        if m == 0:
+            m = 12
+            y -= 1
+    months.reverse()  # oldest first
+
+    trend_rows = conn.execute(
+        """
+        SELECT substr(date, 1, 7) AS month, type, SUM(amount) AS total
+        FROM transactions
+        WHERE substr(date, 1, 7) >= ? AND substr(date, 1, 7) <= ?
+        GROUP BY month, type
+        """,
+        (months[0], months[-1]),
+    ).fetchall()
+
+    income = {key: 0.0 for key in months}
+    expenses = {key: 0.0 for key in months}
+    for row in trend_rows:
+        target = income if row["type"] == "income" else expenses
+        target[row["month"]] = row["total"]
+
+    # --- Expense categories for the selected month ---
+    category_rows = conn.execute(
+        """
+        SELECT category, SUM(amount) AS total
+        FROM transactions
+        WHERE type = 'expense' AND substr(date, 1, 7) = ?
+        GROUP BY category
+        ORDER BY total DESC
+        """,
+        (months[-1],),
+    ).fetchall()
+    conn.close()
+
+    return {
+        "months": months,
+        "income": [round(income[k], 2) for k in months],
+        "expenses": [round(expenses[k], 2) for k in months],
+        "categories": [row["category"] for row in category_rows],
+        "category_totals": [round(row["total"], 2) for row in category_rows],
+    }
 
 # Serve the frontend files (HTML, CSS, JS)
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"

@@ -140,6 +140,8 @@ async function loadTransactions() {
   } catch (error) {
     txList.innerHTML = '<li class="tx-empty">Could not load transactions. Is the server running?</li>';
   }
+  await loadSummary();
+  await updateCharts();
 }
 
 // ----- Edit and Delete buttons (one listener for the whole list) -----

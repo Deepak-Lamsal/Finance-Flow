@@ -47,3 +47,31 @@ async function deleteTransaction(id) {
     throw new Error("Could not delete the transaction");
   }
 }
+async function getSummary(month, year) {
+  let url = `${API_URL}/summary`;
+  if (month && year) {
+    url += `?month=${month}&year=${year}`;
+  }
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Could not load the summary");
+  }
+
+  return response.json();
+}
+async function getChartData(month, year) {
+  let url = `${API_URL}/chart-data`;
+  if (month && year) {
+    url += `?month=${month}&year=${year}`;
+  }
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Could not load chart data");
+  }
+
+  return response.json();
+}

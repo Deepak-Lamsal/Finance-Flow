@@ -488,3 +488,9 @@ body {
     opacity: 1;
   }
 }
+/* ===== Charts ===== */
+.chart-box {
+  position: relative;
+  flex: 1;
+  min-height: 260px;
+}
