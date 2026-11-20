@@ -1,5 +1,5 @@
 :root {
-  --bg: #0b0d0e;
+  --bg: #d0ff00;
   --surface: #121516;
   --surface-2: #171b1c;
   --border: #23282a;
@@ -32,7 +32,7 @@ body {
 /* ===== Sidebar ===== */
 .sidebar {
   width: var(--sidebar-width);
-  background: var(--surface);
+  background: #000000 ;
   border-right: 1px solid var(--border);
   padding: 24px 16px;
   position: sticky;
@@ -121,6 +121,7 @@ body {
 .page-title {
   font-size: 1.6rem;
   font-weight: 600;
+  
 }
 
 .page-subtitle {
