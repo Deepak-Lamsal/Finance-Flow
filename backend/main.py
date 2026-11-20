@@ -122,11 +122,16 @@ def get_summary(
     month: int | None = Query(None, ge=1, le=12),
     year: int | None = Query(None, ge=2000, le=2100),
 ):
-    # If no month/year is given, use the current one
     today = date.today()
     month = month or today.month
     year = year or today.year
-    prefix = f"{year:04d}-{month:02d}"  # e.g. "2026-11"
+    prefix = f"{year:04d}-{month:02d}"
+
+    # Previous month, handling the January -> December rollover
+    if month == 1:
+        prev_prefix = f"{year - 1:04d}-12"
+    else:
+        prev_prefix = f"{year:04d}-{month - 1:02d}"
 
     conn = get_connection()
 
@@ -143,6 +148,15 @@ def get_summary(
     all_rows = conn.execute(
         "SELECT type, SUM(amount) AS total FROM transactions GROUP BY type"
     ).fetchall()
+
+    prev_row = conn.execute(
+        """
+        SELECT COALESCE(SUM(amount), 0) AS total
+        FROM transactions
+        WHERE type = 'expense' AND substr(date, 1, 7) = ?
+        """,
+        (prev_prefix,),
+    ).fetchone()
     conn.close()
 
     month_totals = totals_by_type(month_rows)
@@ -155,6 +169,7 @@ def get_summary(
         "total_expenses": round(month_totals["expense"], 2),
         "monthly_savings": round(month_totals["income"] - month_totals["expense"], 2),
         "remaining_balance": round(all_totals["income"] - all_totals["expense"], 2),
+        "previous_expenses": round(prev_row["total"], 2),
     }
 @app.get("/api/chart-data")
 def get_chart_data(
