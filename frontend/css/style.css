@@ -494,3 +494,40 @@ body {
   flex: 1;
   min-height: 260px;
 }
+/* ===== Month picker and comparison note ===== */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.month-picker {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color-scheme: dark;
+}
+
+.month-picker:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.card-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* More spending than last month is bad (red), less is good (green) */
+.card-note.up {
+  color: #f87171;
+}
+
+.card-note.down {
+  color: var(--accent);
+}
