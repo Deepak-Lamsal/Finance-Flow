@@ -24,3 +24,26 @@ async function getTransactions() {
 
   return response.json();
 }
+async function updateTransaction(id, data) {
+  const response = await fetch(`${API_URL}/transactions/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not update the transaction");
+  }
+
+  return response.json();
+}
+
+async function deleteTransaction(id) {
+  const response = await fetch(`${API_URL}/transactions/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not delete the transaction");
+  }
+}
