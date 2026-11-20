@@ -14,15 +14,35 @@ const INCOME_CATEGORIES = ["Salary", "Freelance", "Gift", "Other"];
 // ----- Grab the elements we need -----
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modal-title");
-const openButton = document.querySelector(".btn-primary");
+const openButton = document.getElementById("add-button");
 const closeButton = document.getElementById("close-modal");
 const form = document.getElementById("transaction-form");
 const categorySelect = document.getElementById("category-select");
 const formError = document.getElementById("form-error");
 const txList = document.getElementById("tx-list");
 
+const monthPicker = document.getElementById("month-picker");
+const expenseNote = document.getElementById("expense-note");
+
+const incomeValue = document.getElementById("income-value");
+const expenseValue = document.getElementById("expense-value");
+const balanceValue = document.getElementById("balance-value");
+const savingsValue = document.getElementById("savings-value");
+
 // Keep the loaded transactions here so Edit can find them
 let transactions = [];
+
+// Today's date in YYYY-MM-DD using the computer's local time
+function todayString() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+// The month being viewed. Starts as the current month, e.g. "2026-11"
+let selectedMonth = todayString().slice(0, 7);
+monthPicker.value = selectedMonth;
 
 // ----- Helpers -----
 function fillCategories(type, selected) {
@@ -40,7 +60,8 @@ function fillCategories(type, selected) {
 }
 
 function formatMoney(amount) {
-  return "NPR " + amount.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  const sign = amount < 0 ? "-" : "";
+  return sign + "NPR " + Math.abs(amount).toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
 function formatDate(dateString) {
@@ -50,6 +71,11 @@ function formatDate(dateString) {
     month: "short",
     year: "numeric",
   });
+}
+
+function selectedParts() {
+  const [year, month] = selectedMonth.split("-").map(Number);
+  return { year, month };
 }
 
 // ----- Open and close the popup -----
@@ -70,7 +96,7 @@ function openModal(transaction) {
     // Add mode: empty form with today's date
     modalTitle.textContent = "Add Transaction";
     form.elements.id.value = "";
-    form.elements.date.value = new Date().toISOString().slice(0, 10);
+    form.elements.date.value = todayString();
     fillCategories("expense");
   }
 
@@ -132,6 +158,49 @@ function renderTransactions() {
   }
 }
 
+// ----- "12% more than last month" under Total Expenses -----
+function showComparison(current, previous) {
+  expenseNote.className = "card-note";
+
+  if (previous === 0) {
+    expenseNote.textContent = "No spending last month to compare";
+    return;
+  }
+
+  const change = ((current - previous) / previous) * 100;
+  const rounded = Math.abs(change).toFixed(0);
+
+  if (change > 0) {
+    expenseNote.textContent = `▲ ${rounded}% more than last month`;
+    expenseNote.classList.add("up");
+  } else if (change < 0) {
+    expenseNote.textContent = `▼ ${rounded}% less than last month`;
+    expenseNote.classList.add("down");
+  } else {
+    expenseNote.textContent = "Same as last month";
+  }
+}
+
+// ----- Fill the four summary cards -----
+async function loadSummary() {
+  try {
+    const { year, month } = selectedParts();
+    const summary = await getSummary(month, year);
+
+    incomeValue.textContent = formatMoney(summary.total_income);
+    expenseValue.textContent = formatMoney(summary.total_expenses);
+    balanceValue.textContent = formatMoney(summary.remaining_balance);
+    savingsValue.textContent = formatMoney(summary.monthly_savings);
+
+    balanceValue.classList.toggle("negative", summary.remaining_balance < 0);
+    savingsValue.classList.toggle("negative", summary.monthly_savings < 0);
+
+    showComparison(summary.total_expenses, summary.previous_expenses);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 // ----- Load data from the backend -----
 async function loadTransactions() {
   try {
@@ -140,8 +209,11 @@ async function loadTransactions() {
   } catch (error) {
     txList.innerHTML = '<li class="tx-empty">Could not load transactions. Is the server running?</li>';
   }
+
   await loadSummary();
-  await updateCharts();
+
+  const { year, month } = selectedParts();
+  await updateCharts(month, year);
 }
 
 // ----- Edit and Delete buttons (one listener for the whole list) -----
@@ -194,6 +266,13 @@ form.addEventListener("submit", async (event) => {
     formError.textContent = error.message;
     formError.hidden = false;
   }
+});
+
+// ----- Month picker: reload everything when the month changes -----
+monthPicker.addEventListener("change", () => {
+  if (!monthPicker.value) return; // ignore if the field was cleared
+  selectedMonth = monthPicker.value;
+  loadTransactions();
 });
 
 // ----- Start: load data when the page opens -----
