@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinanceFlow - Transactions</title>
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="img/logo.svg" class="logo-img" alt="FinanceFlow logo">
+        <span class="logo-text">FinanceFlow</span>
+      </div>
+
+      <p class="nav-heading">Menu</p>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="transactions.html" class="nav-link active">Transactions</a>
+        <a href="#" class="nav-link">Income</a>
+        <a href="#" class="nav-link">Expenses</a>
+      </nav>
+
+      <nav class="nav nav-bottom">
+        <a href="settings.html" class="nav-link">Settings</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Transactions</h1>
+          <p class="page-subtitle">Your full income and expense history</p>
+        </div>
+        <button class="btn-primary" id="add-button">+ Add Transaction</button>
+      </header>
+
+      <!-- Filters -->
+      <section class="filters">
+        <input type="search" id="filter-search" class="filter-input" placeholder="Search by title...">
+
+        <select id="filter-type" class="filter-input">
+          <option value="">All types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+
+        <select id="filter-category" class="filter-input">
+          <option value="">All categories</option>
+        </select>
+
+        <input type="date" id="filter-from" class="filter-input" title="From date">
+        <input type="date" id="filter-to" class="filter-input" title="To date">
+
+        <button type="button" class="tx-btn" id="filter-clear">Clear</button>
+      </section>
+
+      <!-- Results -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">All Transactions</h2>
+          <span class="result-count" id="result-count"></span>
+        </div>
+        <ul class="tx-list tx-list-full" id="tx-list"></ul>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Add / Edit popup -->
+  <div class="modal-overlay" id="modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="panel-title" id="modal-title">Add Transaction</h2>
+        <button class="modal-close" id="close-modal" type="button">&times;</button>
+      </div>
+
+      <form id="transaction-form">
+        <input type="hidden" name="id">
+
+        <div class="type-toggle">
+          <label>
+            <input type="radio" name="type" value="expense" checked>
+            <span>Expense</span>
+          </label>
+          <label>
+            <input type="radio" name="type" value="income">
+            <span>Income</span>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Title</span>
+          <input type="text" name="title" placeholder="e.g. Lunch" required maxlength="100">
+        </label>
+
+        <label class="field">
+          <span>Amount</span>
+          <input type="number" name="amount" placeholder="0.00" min="0.01" step="0.01" required>
+        </label>
+
+        <label class="field">
+          <span>Category</span>
+          <select name="category" id="category-select" required></select>
+        </label>
+
+        <label class="field">
+          <span>Date</span>
+          <input type="date" name="date" required>
+        </label>
+
+        <p class="form-error" id="form-error" hidden></p>
+
+        <button class="btn-primary btn-full" type="submit">Save Transaction</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/transactions.js"></script>
+</body>
+</html>

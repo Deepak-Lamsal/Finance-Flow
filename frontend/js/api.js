@@ -15,8 +15,18 @@ async function createTransaction(data) {
   return response.json();
 }
 
-async function getTransactions() {
-  const response = await fetch(`${API_URL}/transactions`);
+async function getTransactions(filters = {}) {
+  const params = new URLSearchParams();
+
+  // Only add filters that have a value
+  for (const [key, value] of Object.entries(filters)) {
+    if (value) params.append(key, value);
+  }
+
+  const query = params.toString();
+  const url = query ? `${API_URL}/transactions?${query}` : `${API_URL}/transactions`;
+
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new Error("Could not load transactions");

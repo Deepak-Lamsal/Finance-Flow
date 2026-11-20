@@ -48,11 +48,38 @@ def create_transaction(transaction: TransactionCreate):
 
 
 @app.get("/api/transactions", response_model=list[TransactionOut])
-def list_transactions():
+def list_transactions(
+    type: str | None = Query(None, pattern="^(income|expense)$"),
+    category: str | None = None,
+    search: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+):
+    # Build the SQL step by step: start with "everything",
+    # then add one condition for each filter that was provided.
+    sql = "SELECT * FROM transactions WHERE 1=1"
+    params = []
+
+    if type:
+        sql += " AND type = ?"
+        params.append(type)
+    if category:
+        sql += " AND category = ?"
+        params.append(category)
+    if search:
+        sql += " AND title LIKE ?"
+        params.append(f"%{search}%")
+    if date_from:
+        sql += " AND date >= ?"
+        params.append(date_from)
+    if date_to:
+        sql += " AND date <= ?"
+        params.append(date_to)
+
+    sql += " ORDER BY date DESC, id DESC"
+
     conn = get_connection()
-    rows = conn.execute(
-        "SELECT * FROM transactions ORDER BY date DESC, id DESC"
-    ).fetchall()
+    rows = conn.execute(sql, params).fetchall()
     conn.close()
 
     return [dict(row) for row in rows]

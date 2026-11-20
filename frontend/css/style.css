@@ -536,3 +536,44 @@ body {
   height: 38px;
   border-radius: 10px;
 }
+/* ===== Filters (Transactions page) ===== */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.filter-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color-scheme: dark;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+#filter-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filters .tx-btn {
+  padding: 9px 16px;
+}
+
+.result-count {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.tx-list-full {
+  max-height: none;
+}
