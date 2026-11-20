@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 
 from database import get_connection, init_db
 from schemas import TransactionCreate, TransactionOut
@@ -103,3 +106,7 @@ def delete_transaction(transaction_id: int):
     # rowcount = how many rows were deleted. 0 means that id didn't exist
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Transaction not found")
+
+# Serve the frontend files (HTML, CSS, JS)
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+app.mount("/app", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
