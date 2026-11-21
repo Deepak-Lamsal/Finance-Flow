@@ -581,3 +581,36 @@ border-radius: 12px;
 .tx-list-full {
   max-height: none;
 }
+/* ===== Settings page ===== */
+.settings-panel {
+  min-height: 0;
+  margin-bottom: 16px;
+  max-width: 560px;
+  gap: 12px;
+}
+
+.settings-help {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.settings-preview {
+  color: var(--text-muted);
+}
+
+.settings-preview strong {
+  color: var(--text);
+}
+
+.settings-message {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+#currency-select {
+  max-width: 320px;
+}
+
+.settings-panel .btn-primary {
+  align-self: flex-start;
+}
