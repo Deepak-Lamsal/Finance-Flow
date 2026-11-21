@@ -1,5 +1,5 @@
 :root {
-  --bg: #d0ff00;
+  --bg: #000000cd;
   --surface: #121516;
   --surface-2: #171b1c;
   --border: #23282a;
@@ -116,6 +116,9 @@ body {
   align-items: center;
   margin-bottom: 24px;
   gap: 16px;
+  background: #040404;
+padding: 20px;
+border-radius: 12px;
 }
 
 .page-title {
