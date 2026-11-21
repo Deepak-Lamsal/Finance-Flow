@@ -90,7 +90,7 @@ function drawCategoryChart(data) {
       maintainAspectRatio: false,
       cutout: "62%",
       plugins: {
-        legend: { position: "bottom", labels: { usePointStyle: true } },
+        legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, boxHeight: 8 } },
         tooltip: { enabled: hasData },
       },
     },
