@@ -234,6 +234,11 @@ form.addEventListener("submit", async (event) => {
     formError.hidden = false;
   }
 });
+// If the page was opened as transactions.html?type=income, pre-select the filter
+const urlType = new URLSearchParams(window.location.search).get("type");
+if (urlType === "income" || urlType === "expense") {
+  filterType.value = urlType;
+}
 
 // ----- Start -----
 fillFilterCategories();
