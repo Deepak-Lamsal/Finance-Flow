@@ -10,7 +10,7 @@ const CATEGORY_COLORS = [
 ];
 
 // Chart defaults for the dark theme
-Chart.defaults.color = "#8a9396";
+Chart.defaults.color = "#6b5e2e";
 Chart.defaults.font.family = '"Segoe UI", system-ui, sans-serif';
 
 function monthLabel(key) {
