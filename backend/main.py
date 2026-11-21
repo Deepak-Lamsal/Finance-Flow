@@ -256,6 +256,34 @@ def get_chart_data(
         "categories": [row["category"] for row in category_rows],
         "category_totals": [round(row["total"], 2) for row in category_rows],
     }
+ALLOWED_CURRENCIES = ["NPR", "USD", "EUR", "INR", "GBP"]
+
+
+class SettingsUpdate(BaseModel):
+    currency: str
+
+
+@app.get("/api/settings")
+def get_settings():
+    conn = get_connection()
+    rows = conn.execute("SELECT key, value FROM settings").fetchall()
+    conn.close()
+    return {row["key"]: row["value"] for row in rows}
+
+
+@app.put("/api/settings")
+def update_settings(settings: SettingsUpdate):
+    if settings.currency not in ALLOWED_CURRENCIES:
+        raise HTTPException(status_code=422, detail="Unsupported currency")
+
+    conn = get_connection()
+    conn.execute(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('currency', ?)",
+        (settings.currency,),
+    )
+    conn.commit()
+    conn.close()
+    return {"currency": settings.currency}
 
 # Serve the frontend files (HTML, CSS, JS)
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"

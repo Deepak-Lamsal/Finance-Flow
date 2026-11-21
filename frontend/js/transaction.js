@@ -237,4 +237,4 @@ form.addEventListener("submit", async (event) => {
 
 // ----- Start -----
 fillFilterCategories();
-loadTransactions();
+loadCurrency().then(loadTransactions);

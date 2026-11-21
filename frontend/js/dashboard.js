@@ -276,4 +276,4 @@ monthPicker.addEventListener("change", () => {
 });
 
 // ----- Start: load data when the page opens -----
-loadTransactions();
+loadCurrency().then(loadTransactions);
