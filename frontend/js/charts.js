@@ -40,10 +40,10 @@ function drawTrendChart(data) {
           pointRadius: 3,
         },
         {
-          label: "Expenses",
+           label: "Expenses",
           data: data.expenses,
-          borderColor: "#2dd4bf",
-          backgroundColor: "rgba(45, 212, 191, 0.15)",
+          borderColor: "#f87171",
+          backgroundColor: "rgba(248, 113, 113, 0.18)",
           fill: true,
           tension: 0.4,
           pointRadius: 3,
