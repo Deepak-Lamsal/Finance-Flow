@@ -195,9 +195,13 @@ async function loadSummary() {
     balanceValue.classList.toggle("negative", summary.remaining_balance < 0);
     savingsValue.classList.toggle("negative", summary.monthly_savings < 0);
 
-    showComparison(summary.total_expenses, summary.previous_expenses);
+       showComparison(summary.total_expenses, summary.previous_expenses);
   } catch (error) {
     console.error(error);
+    incomeValue.textContent = "-";
+    expenseValue.textContent = "-";
+    balanceValue.textContent = "-";
+    savingsValue.textContent = "-";
   }
 }
 
